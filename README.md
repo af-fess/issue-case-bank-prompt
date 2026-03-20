@@ -6,7 +6,7 @@ They don't know about the race condition your team fixed two years ago. Or the s
 
 That knowledge lives in git history — and it's invisible to any AI by default.
 
-This repo contains a **reusable prompt** that mines your git history, classifies past bugs and crashes, and produces a structured **Issue Case Bank** your AI consults automatically before writing code.
+This repo contains a **reusable prompt** that mines your git history, classifies past bugs and crashes, and produces a structured **Issue Case Bank** your AI can consult before writing code.
 
 ---
 
@@ -38,11 +38,11 @@ The difference from automated extraction: **a human wrote the Takeaway.** The AI
 A ranked table showing which components carry the most historical risk:
 
 
-| Component            | Issues     | Dominant Bug Classes                          | Cases           |
-|----------------------|------------|-----------------------------------------------|-----------------|
-| Core Engine          | ████████ 8 | security-gap × 3, logic-error × 3, concurrency × 2 | 001–008    |
-| Build Pipeline       | █████    5 | build-pipeline × 4, security-gap × 1         | 009–013         |
-| Networking Layer     | ███      3 | null-safety × 2, serialization × 1           | 014–016         |
+| Component            | Issues     | Dominant Bug Classes                               | Cases      |
+|----------------------|------------|----------------------------------------------------|------------|
+| Core Engine          | ████████ 8 | security-gap × 3, logic-error × 3, concurrency × 2 | 001–008   |
+| Build Pipeline       | █████    5 | build-pipeline × 4, security-gap × 1              | 009–013    |
+| Networking Layer     | ███      3 | null-safety × 2, serialization × 1                | 014–016    |
 
 
 ### Individual Cases
@@ -77,22 +77,15 @@ condition. Per-call computation belongs in local variables. Ask before
 adding class properties: "Is this truly shared state, or per-call state?"
 ```
 
-### Automatic Hook
-A pre-edit shell hook fires before any file edit, checks whether the file is a known hot zone, and outputs the relevant case numbers to the AI as context — automatically, without the engineer having to remember to check.
-
 ---
 
 ## How to Use
 
 ### Step 1 — Run the prompt
-Open your project in Claude Code (or any AI coding assistant that supports system prompts / context files). Paste the full contents of [`GENERATE_ISSUE_CASES_PROMPT.md`](./GENERATE_ISSUE_CASES_PROMPT.md) into the session.
+Open your project in Claude Code (or any AI coding assistant that supports context files).
+Paste the full contents of [`GENERATE_ISSUE_CASES_PROMPT.md`](./GENERATE_ISSUE_CASES_PROMPT.md) into the session.
 
-The AI will:
-1. Mine your full git history across all branches
-2. Build the Hot Zones Map
-3. Write individual cases with Takeaway rules
-4. Update your `CLAUDE.md` (or equivalent) with a component lookup table
-5. Generate the pre-edit hook script and wire it into your settings
+The AI will mine your git history, build the Hot Zones Map, and write the full case bank with Takeaway rules.
 
 ### Step 2 — Review and refine
 The AI does the mining. You refine the Takeaways. The more specific and opinionated the Takeaway, the more useful it is.
@@ -102,25 +95,7 @@ Every time a non-obvious bug is fixed, add a case while the context is fresh. Th
 
 ---
 
-## File Structure
-
-```
-your-project/
-├── .claude/
-│   ├── skills/
-│   │   └── issue-cases/
-│   │       └── ISSUE_CASES.md      ← the generated case bank
-│   ├── hooks/
-│   │   └── hot-zone-check.sh       ← pre-edit hook
-│   └── settings.local.json         ← hook registration
-└── CLAUDE.md                       ← updated with component lookup table
-```
-
----
-
 ## Why Not Just Automate It?
-
-Automated git-to-context tools exist and are useful. The case bank approach is complementary, not a replacement. The key difference:
 
 | Automated extraction | Human-curated case bank |
 |----------------------|------------------------|
@@ -135,9 +110,8 @@ The Takeaway is the unit of value. A raw commit diff tells the AI *what changed*
 
 ## Compatibility
 
-The prompt is written for **Claude Code** but the concept works with any AI coding assistant that supports:
-- System prompt / context file injection (CLAUDE.md, AGENTS.md, .cursorrules, Copilot instructions)
-- Pre-edit hooks or equivalent automation
+Works with any AI coding assistant that supports context file injection:
+CLAUDE.md, AGENTS.md, .cursorrules, Copilot instructions, or equivalent.
 
 ---
 
